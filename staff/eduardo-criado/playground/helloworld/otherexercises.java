@@ -50,7 +50,9 @@ public class otherexercises {
         char myChar = 'Z';
         System.out.println("Mi caracter preferido es: " + myChar);
 
-        String myString = "Q pasa chaval?";
+        String myString = "Q pasa chaval?" ;
+        // String myString = new String("Q pasa chaval?") ;
+        
         System.out.println(myString);
 
         //para saber el tipo de dato se usa .getClass() y se imprime con .getSimpleName()
@@ -58,7 +60,9 @@ public class otherexercises {
 
         System.out.println(((Object) myChar).getClass().getSimpleName());
         
-        System.out.println(((Object)myDouble).getClass().getSimpleName());
+        System.out.println(((Object) myDouble).getClass().getSimpleName());
+        
+        System.out.println(myString instanceof String);
 
     }
 }
