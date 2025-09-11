@@ -1,11 +1,9 @@
 package logic;
 
-import javax.security.auth.login.CredentialException;
-
 import data.Data;
 import data.User;
-import errors.DuplicityException;
-import errors.CredentialsException;
+
+import errors.*;
 
 public class Logic {
 
@@ -18,25 +16,26 @@ public class Logic {
         return instance;
     }
 
-    public static void main(String[] args) {
+    // public static void main(String[] args) {
 
-        Logic logic = Logic.get();
+    // Logic logic = Logic.get();
+    // Data data = Data.get();
 
-        try {
-            logic.registerUser("Eduardo", "edulo", "1234");
-            logic.registerUser("Eduardo", "edulo", "1234");
-        } catch (DuplicityException exception) {
-            // TODO Auto-generated catch block
-            exception.printStackTrace();
-        }
+    // try {
+    // logic.registerUser("Eduardo", "edulo", "1234");
+    // logic.registerUser("Eduardo", "edulo", "1234");
+    // } catch (DuplicityException exception) {
+    // // TODO Auto-generated catch block
+    // exception.printStackTrace();
+    // }
 
-        User user = Data.get().findUserByUsername("edulo");
-        if (user != null) {
-            System.out.println("User found: " + user.getName());
-        } else {
-            System.out.println("User not found");
-        }
-    }
+    // User user = data.findUserByUsername("edulo");
+    // if (user != null) {
+    // System.out.println("User found: " + user.getName());
+    // } else {
+    // System.out.println("User not found");
+    // }
+    // }
 
     private String username;
 
@@ -44,6 +43,8 @@ public class Logic {
     }
 
     public void registerUser(String name, String username, String password) throws DuplicityException {
+
+        // this.username = username;
 
         Data data = Data.get();
 
@@ -59,19 +60,32 @@ public class Logic {
 
     }
 
-    public void loginUser(String username, String password) throws CredentialsException {
+    public void loginUser(String username, String password) throws NotFoundException, CredentialsException {
         Data data = Data.get();
 
         User user = data.findUserByUsername(username);
 
-        if (user == null || !user.getUsername().equals(username)) {
-            throw new CredentialsException("invalid credentials");
+        if (user == null) {
+            throw new CredentialsException("user not found");
+        }
+
+        if (!user.getPassword().equals(password)) {
+            throw new CredentialsException("invalid password");
         }
 
         this.username = username;
 
-        System.out.println("User logged in: " + user.getName());
+    }
 
+    public String getUsername() throws NotFoundException {
+        Data data = Data.get();
+        User user = data.findUserByUsername(this.username);
+
+        if (user == null) {
+            throw new NotFoundException("user not found");
+        }
+
+        return user.getName();
     }
 
 }
