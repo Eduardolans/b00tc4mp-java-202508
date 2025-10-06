@@ -67,12 +67,20 @@
     </properties>
 
     <dependencies>
+
         <!-- Ejemplo: Dependencia para JUnit 5 (tests) -->
-        <dependency>
+        <!-- <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.10.0</version>
             <scope>test</scope>
+        </dependency> -->
+
+        <!-- Dependenciia para JSON api inspirational quotes -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
         </dependency>
     </dependencies>
 

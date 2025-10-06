@@ -3,6 +3,7 @@ import javax.swing.*;
 
 import errors.*;
 import logic.Logic;
+import logic.QuoteService;
 
 public class App extends JFrame {
 
@@ -19,6 +20,7 @@ public class App extends JFrame {
     private JPanel cardPanel;
     private CardLayout cardLayout;
     private JLabel homeWelcomeLabel;
+    private JLabel quoteLabel;
 
     private Logic logic;
 
@@ -188,6 +190,12 @@ public class App extends JFrame {
                 // homeWelcomeLabel.setText("Welcome, " + name + "!!");
                 homeWelcomeLabel.setText("Welcome, " + logic.getUsername() + "!");
 
+                String quote = QuoteService.getDailyQuote();
+                quoteLabel.setText("<html><div style='width: 300px; text-align: center;'>Today's quote: " + quote
+                        + "</div></html>");
+
+                // quoteLabel.setText("Today's quote: " + QuoteService.getDailyQuote());
+
                 cardLayout.show(cardPanel, HOME_VIEW);
 
             } catch (NotFoundException exception) {
@@ -226,10 +234,29 @@ public class App extends JFrame {
         // Welcome label
         gbc.gridx = 0;
         gbc.gridy = 0;
-        panel.add(homeWelcomeLabel = new JLabel("Welcome to the Home Page!"), gbc);
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        homeWelcomeLabel = new JLabel("Welcome to the Home Page!");
+        homeWelcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(homeWelcomeLabel, gbc);
+
+        // panel.add(homeWelcomeLabel = new JLabel("Welcome to the Home Page!"), gbc);
+
+        // Quote label
+        // gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        quoteLabel = new JLabel(""); // Inicializa el label para la quote
+        quoteLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        quoteLabel.setVerticalAlignment(SwingConstants.TOP);
+        panel.add(quoteLabel, gbc);
+        // panel.add(new JLabel(QuoteService.getDailyQuote()), gbc);
 
         // Logout button
-        gbc.gridy = 1;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         JButton logoutButton = new JButton("Logout");
         panel.add(logoutButton, gbc);
 

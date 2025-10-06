@@ -1,6 +1,7 @@
 errors/NotFoundException.class
 errors/DuplicityException.class
 data/User.class
+logic/QuoteService.class
 logic/Logic.class
 App.class
 data/Data.class
