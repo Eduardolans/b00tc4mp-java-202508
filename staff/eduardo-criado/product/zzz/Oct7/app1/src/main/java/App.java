@@ -174,7 +174,7 @@ public class App extends JFrame {
         JButton toRegisterButton = new JButton("No account? Register");
         panel.add(toRegisterButton, gbc);
 
-        // Action
+        // Actions
         loginButton.addActionListener(event -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
@@ -185,6 +185,8 @@ public class App extends JFrame {
                 usernameField.setText("");
                 passwordField.setText("");
 
+                // String name = logic.getUsername();
+                // homeWelcomeLabel.setText("Welcome, " + name + "!!");
                 homeWelcomeLabel.setText("Welcome, " + logic.getUsername() + "!");
 
                 String quote = logic.getDailyQuote();
@@ -198,11 +200,15 @@ public class App extends JFrame {
             } catch (NotFoundException exception) {
                 exception.printStackTrace();
 
+                // JOptionPane.showMessageDialog(this, exception.getMessage(), "Message",
+                // JOptionPane.ERROR_MESSAGE);
                 JOptionPane.showMessageDialog(this, exception.getMessage());
 
             } catch (CredentialsException exception) {
                 exception.printStackTrace();
 
+                // JOptionPane.showMessageDialog(this, exception.getMessage(), "Message",
+                // JOptionPane.ERROR_MESSAGE);
                 JOptionPane.showMessageDialog(this, exception.getMessage());
             }
         });

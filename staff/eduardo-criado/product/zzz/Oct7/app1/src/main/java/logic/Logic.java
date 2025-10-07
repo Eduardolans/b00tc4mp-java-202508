@@ -24,6 +24,27 @@ public class Logic {
         return instance;
     }
 
+    // public static void main(String[] args) {
+
+    // Logic logic = Logic.get();
+    // Data data = Data.get();
+
+    // try {
+    // logic.registerUser("Eduardo", "edulo", "1234");
+    // logic.registerUser("Eduardo", "edulo", "1234");
+    // } catch (DuplicityException exception) {
+    // // TODO Auto-generated catch block
+    // exception.printStackTrace();
+    // }
+
+    // User user = data.findUserByUsername("edulo");
+    // if (user != null) {
+    // System.out.println("User found: " + user.getName());
+    // } else {
+    // System.out.println("User not found");
+    // }
+    // }
+
     private String username;
 
     private Logic() {
