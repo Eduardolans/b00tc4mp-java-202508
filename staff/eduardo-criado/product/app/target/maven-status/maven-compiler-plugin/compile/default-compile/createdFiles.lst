@@ -1,0 +1,11 @@
+errors/NotFoundException.class
+errors/ClientError.class
+errors/DuplicityException.class
+data/User.class
+errors/ServerError.class
+errors/ContentError.class
+logic/Logic.class
+App.class
+data/Data.class
+errors/CredentialsException.class
+errors/ConnectionError.class

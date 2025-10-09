@@ -187,13 +187,39 @@ public class App extends JFrame {
 
                 homeWelcomeLabel.setText("Welcome, " + logic.getUsername() + "!");
 
-                String quote = logic.getDailyQuote();
-                quoteLabel.setText("<html><div style='width: 300px; text-align: center;'>Today's quote: " + quote
-                        + "</div></html>");
+                // String quote = logic.getDailyQuote();
+                // quoteLabel.setText("<html><div style='width: 300px; text-align:
+                // center;'>Today's quote: " + quote
+                // + "</div></html>");
 
-                // quoteLabel.setText("Today's quote: " + QuoteService.getDailyQuote());
+                try {
+                    String quote = logic.getDailyQuote();
+                    quoteLabel.setText("<html><div style='width: 300px; text-align:center;'>Today's quote: " + quote
+                            + "</div></html>");
+                } catch (ConnectionError | ServerError | ClientError | ContentError e) {
+                    e.printStackTrace();
+                    quoteLabel
+                            .setText("<html><div style='width: 300px; text-align: center;'>Could not load daily quote: "
+                                    + e.getMessage() + "</div></html>");
+                }
 
                 cardLayout.show(cardPanel, HOME_VIEW);
+
+                // try {
+                // String quote = logic.getDailyQuote();
+                // quoteLabel.setText("<html><div style='width: 300px; text-align:
+                // center;'>Today's quote: " + quote
+                // + "</div></html>");
+                // } catch (ConnectionError | ServerError | ClientError | ContentError e) {
+                // e.printStackTrace();
+                // JOptionPane.showMessageDialog(this,
+                // "Could not load daily quote: " + e.getMessage(),
+                // "Quote Error",
+                // JOptionPane.WARNING_MESSAGE);
+                // quoteLabel.setText(
+                // "<html><div style='width: 300px; text-align: center;'>Quote
+                // unavailable</div></html>");
+                // }
 
             } catch (NotFoundException exception) {
                 exception.printStackTrace();
