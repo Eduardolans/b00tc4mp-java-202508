@@ -1,11 +1,11 @@
 /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/App.java
 /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/data/Data.java
 /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/data/User.java
-/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ClientError.java
-/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ConnectionError.java
-/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ContentError.java
+/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ClientException.java
+/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ConnectionException.java
+/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ContentException.java
 /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/CredentialsException.java
 /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/DuplicityException.java
 /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/NotFoundException.java
-/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ServerError.java
+/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/errors/ServerException.java
 /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/src/main/java/logic/Logic.java

@@ -1,7 +1,25 @@
-import java.awt.*;
-import javax.swing.*;
+import java.awt.CardLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
-import errors.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+
+import errors.ClientException;
+import errors.ConnectionException;
+import errors.ContentException;
+import errors.CredentialsException;
+import errors.DuplicityException;
+import errors.NotFoundException;
+import errors.ServerException;
 import logic.Logic;
 
 public class App extends JFrame {
@@ -187,17 +205,14 @@ public class App extends JFrame {
 
                 homeWelcomeLabel.setText("Welcome, " + logic.getUsername() + "!");
 
-                // String quote = logic.getDailyQuote();
-                // quoteLabel.setText("<html><div style='width: 300px; text-align:
-                // center;'>Today's quote: " + quote
-                // + "</div></html>");
 
                 try {
                     String quote = logic.getDailyQuote();
                     quoteLabel.setText("<html><div style='width: 300px; text-align:center;'>Today's quote: " + quote
                             + "</div></html>");
-                } catch (ConnectionError | ServerError | ClientError | ContentError e) {
+                } catch (ConnectionException | ServerException | ClientException | ContentException e) {
                     e.printStackTrace();
+                    
                     quoteLabel
                             .setText("<html><div style='width: 300px; text-align: center;'>Could not load daily quote: "
                                     + e.getMessage() + "</div></html>");
@@ -205,22 +220,7 @@ public class App extends JFrame {
 
                 cardLayout.show(cardPanel, HOME_VIEW);
 
-                // try {
-                // String quote = logic.getDailyQuote();
-                // quoteLabel.setText("<html><div style='width: 300px; text-align:
-                // center;'>Today's quote: " + quote
-                // + "</div></html>");
-                // } catch (ConnectionError | ServerError | ClientError | ContentError e) {
-                // e.printStackTrace();
-                // JOptionPane.showMessageDialog(this,
-                // "Could not load daily quote: " + e.getMessage(),
-                // "Quote Error",
-                // JOptionPane.WARNING_MESSAGE);
-                // quoteLabel.setText(
-                // "<html><div style='width: 300px; text-align: center;'>Quote
-                // unavailable</div></html>");
-                // }
-
+                
             } catch (NotFoundException exception) {
                 exception.printStackTrace();
 
