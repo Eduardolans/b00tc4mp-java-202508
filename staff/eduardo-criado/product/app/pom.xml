@@ -49,7 +49,7 @@
             <scope>test</scope>
         </dependency>
 
-         <!-- Other dependencies -->
+        <!-- Other dependencies -->
         <!-- <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
