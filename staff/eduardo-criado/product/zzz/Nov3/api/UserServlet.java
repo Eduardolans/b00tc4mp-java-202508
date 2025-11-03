@@ -1,0 +1,81 @@
+package com.example;
+
+import java.io.IOException;
+
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.json.JSONObject;
+
+import data.User;
+import errors.NotFoundException;
+import logic.Logic;
+
+@WebServlet("/user")
+public class UserServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            // Verificar si hay una sesión activa
+            HttpSession session = request.getSession(false);
+
+            if (session == null || session.getAttribute("username") == null) {
+                // No hay sesión activa
+                JSONObject jsonResponse = new JSONObject();
+                jsonResponse.put("success", false);
+                jsonResponse.put("error", "Unauthorized");
+                jsonResponse.put("message", "No active session");
+
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write(jsonResponse.toString());
+                return;
+            }
+
+            // Obtener el username de la sesión
+            String username = (String) session.getAttribute("username");
+
+            // Obtener los datos del usuario
+            Logic logic = Logic.get();
+            User user = logic.getUserByUsername(username);
+
+            // Respuesta exitosa con los datos del usuario
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("success", true);
+            jsonResponse.put("name", user.getName());
+            jsonResponse.put("username", user.getUsername());
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(jsonResponse.toString());
+
+        } catch (NotFoundException e) {
+            // Usuario no encontrado
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("success", false);
+            jsonResponse.put("error", "NotFoundException");
+            jsonResponse.put("message", e.getMessage());
+
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.getWriter().write(jsonResponse.toString());
+
+        } catch (Exception e) {
+            // Error general
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("success", false);
+            jsonResponse.put("error", "InternalServerError");
+            jsonResponse.put("message", e.getMessage());
+
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(jsonResponse.toString());
+        }
+    }
+}
