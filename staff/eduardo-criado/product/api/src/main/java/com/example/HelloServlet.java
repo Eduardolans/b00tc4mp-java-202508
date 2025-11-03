@@ -12,10 +12,10 @@ public class HelloServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("Hi MANUUUUUU!");
+        response.getWriter().write("Hi MANoAAAAAppppppppppppppPPPOOOOLLLOOOiiiiiiii!");
     }
 }
