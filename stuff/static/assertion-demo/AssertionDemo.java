@@ -8,7 +8,7 @@ public class AssertionDemo {
         // Assertions.assertTrue(value > 0, "Value must be positive");
         assertTrue(value > 0, "Value must be positive");
         Assertions.assertEquals("Hello", "Hello", "Strings should be equal");
-        //System.out.println("All assertions passed.");
+        System.out.println("All assertions passed.");
 
         // Demonstrate assertDoesNotThrow
 
@@ -17,7 +17,7 @@ public class AssertionDemo {
             int result = value / 1;
         }, "Division by non-zero should not throw");    
 
-        //System.out.println("No exception thrown as expected.");
+        System.out.println("No exception thrown as expected.");
         
         // Demonstrate assertThrows
 
@@ -26,6 +26,6 @@ public class AssertionDemo {
             int result = value / 0;
         }, "Division by zero should throw ArithmeticException");
         
-        // System.out.println("Caught expected exception: " + exception);  
+        System.out.println("Caught expected exception: " + exception);  
     }
 }
