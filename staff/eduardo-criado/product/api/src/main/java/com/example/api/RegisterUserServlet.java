@@ -1,4 +1,4 @@
-package com.example;
+package com.example.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,17 +7,14 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.json.JSONObject;
 
-import data.User;
-import errors.CredentialsException;
-import errors.NotFoundException;
-import logic.Logic;
+import com.example.errors.DuplicityException;
+import com.example.logic.Logic;
 
-@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/users")
+public class RegisterUserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @Override
@@ -39,35 +36,25 @@ public class LoginServlet extends HttpServlet {
             // Parsear el JSON
             JSONObject jsonRequest = new JSONObject(sb.toString());
 
+            String name = jsonRequest.getString("name");
             String username = jsonRequest.getString("username");
             String password = jsonRequest.getString("password");
 
-            // Llamar a la lógica de login
+            // Llamar a la lógica de registro
             Logic logic = Logic.get();
-            User user = logic.loginUser(username, password);
+            logic.registerUser(name, username, password);
 
-            // Crear sesión y guardar el username
-            HttpSession session = request.getSession(true);
-            session.setAttribute("username", username);
+            response.setStatus(HttpServletResponse.SC_CREATED);
+            response.getWriter().flush();
 
-            // Respuesta exitosa con el nombre del usuario
-            JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("success", true);
-            jsonResponse.put("message", "Login successful");
-            jsonResponse.put("name", user.getName());
-            jsonResponse.put("username", user.getUsername());
-
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(jsonResponse.toString());
-
-        } catch (CredentialsException | NotFoundException e) {
-            // Credenciales inválidas
+        } catch (DuplicityException e) {
+            // Usuario ya existe
             JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("success", false);
-            jsonResponse.put("error", "CredentialsException");
+            jsonResponse.put("error", "DuplicityException");
             jsonResponse.put("message", e.getMessage());
 
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
             response.getWriter().write(jsonResponse.toString());
 
         } catch (Exception e) {
@@ -81,4 +68,5 @@ public class LoginServlet extends HttpServlet {
             response.getWriter().write(jsonResponse.toString());
         }
     }
+
 }

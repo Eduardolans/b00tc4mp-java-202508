@@ -1,4 +1,4 @@
-package data;
+package com.example.data;
 
 public class Data {
     private static Data instance;

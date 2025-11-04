@@ -1,4 +1,4 @@
-package com.example;
+package com.example.api;
 
 import java.io.IOException;
 
@@ -10,12 +10,12 @@ import javax.servlet.http.HttpSession;
 
 import org.json.JSONObject;
 
-import data.User;
-import errors.NotFoundException;
-import logic.Logic;
+import com.example.data.User;
+import com.example.errors.NotFoundException;
+import com.example.logic.Logic;
 
-@WebServlet("/user")
-public class UserServlet extends HttpServlet {
+@WebServlet("/users/info")
+public class GetUserInfoServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @Override

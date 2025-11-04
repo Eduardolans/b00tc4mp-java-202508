@@ -1,10 +1,10 @@
-package logic;
+package com.example.logic;
 
-import data.Data;
-import data.User;
-import errors.CredentialsException;
-import errors.DuplicityException;
-import errors.NotFoundException;
+import com.example.data.Data;
+import com.example.data.User;
+import com.example.errors.CredentialsException;
+import com.example.errors.DuplicityException;
+import com.example.errors.NotFoundException;
 
 public class Logic {
 
@@ -36,7 +36,7 @@ public class Logic {
 
     }
 
-    public User loginUser(String username, String password) throws NotFoundException, CredentialsException {
+    public String authenticateUser(String username, String password) throws NotFoundException, CredentialsException {
         Data data = Data.get();
 
         User user = data.findUserByUsername(username);
@@ -49,7 +49,7 @@ public class Logic {
             throw new CredentialsException("invalid credentials");
         }
 
-        return user;
+        return user.getId();
     }
 
     public User getUserByUsername(String username) throws NotFoundException {

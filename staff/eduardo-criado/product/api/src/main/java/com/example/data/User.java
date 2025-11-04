@@ -1,14 +1,22 @@
-package data;
+package com.example.data;
+
+import java.util.UUID;
 
 public class User {
+    private String id;
     private String name;
     private String username;
     private String password;
 
     public User(String name, String username, String password) {
+        this.id = UUID.randomUUID().toString();
         this.name = name;
         this.username = username;
         this.password = password;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {

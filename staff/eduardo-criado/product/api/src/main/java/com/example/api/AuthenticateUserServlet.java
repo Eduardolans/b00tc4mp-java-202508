@@ -1,4 +1,4 @@
-package com.example;
+package com.example.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,11 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 
-import errors.DuplicityException;
-import logic.Logic;
+import com.example.api.util.JwtUtil;
+import com.example.errors.CredentialsException;
+import com.example.errors.NotFoundException;
+import com.example.logic.Logic;
 
-@WebServlet("/register")
-public class RegisterUserServlet extends HttpServlet {
+@WebServlet("/users/auth")
+public class AuthenticateUserServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     @Override
@@ -36,30 +38,30 @@ public class RegisterUserServlet extends HttpServlet {
             // Parsear el JSON
             JSONObject jsonRequest = new JSONObject(sb.toString());
 
-            String name = jsonRequest.getString("name");
             String username = jsonRequest.getString("username");
             String password = jsonRequest.getString("password");
 
-            // Llamar a la lógica de registro
+            // Llamar a la lógica de login
             Logic logic = Logic.get();
-            logic.registerUser(name, username, password);
+            String userId = logic.authenticateUser(username, password);
 
-            // Respuesta exitosa
+            String token = JwtUtil.generateToken(userId);
+
+            // Respuesta exitosa con el nombre del usuario
             JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("success", true);
-            jsonResponse.put("message", "User registered successfully");
+            jsonResponse.put("token", "Bearer " + token);
 
-            response.setStatus(HttpServletResponse.SC_CREATED);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(jsonResponse.toString());
 
-        } catch (DuplicityException e) {
-            // Usuario ya existe
+        } catch (CredentialsException | NotFoundException e) {
+            // Credenciales inválidas
             JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("success", false);
-            jsonResponse.put("error", "DuplicityException");
+            jsonResponse.put("error", "CredentialsException");
             jsonResponse.put("message", e.getMessage());
 
-            response.setStatus(HttpServletResponse.SC_CONFLICT);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write(jsonResponse.toString());
 
         } catch (Exception e) {

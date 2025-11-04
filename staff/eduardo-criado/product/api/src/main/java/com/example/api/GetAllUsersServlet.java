@@ -1,4 +1,4 @@
-package com.example;
+package com.example.api;
 
 import java.io.IOException;
 
@@ -10,10 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import data.User;
-import logic.Logic;
+import com.example.data.User;
+import com.example.logic.Logic;
 
-@WebServlet("/users")
+@WebServlet("/users/all")
 public class GetAllUsersServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -33,7 +33,7 @@ public class GetAllUsersServlet extends HttpServlet {
             JSONArray usersArray = new JSONArray();
 
             for (User user : users) {
-                if (user != null) {  // Filtrar usuarios null
+                if (user != null) { // Filtrar usuarios null
                     JSONObject userJson = new JSONObject();
                     userJson.put("name", user.getName());
                     userJson.put("username", user.getUsername());
