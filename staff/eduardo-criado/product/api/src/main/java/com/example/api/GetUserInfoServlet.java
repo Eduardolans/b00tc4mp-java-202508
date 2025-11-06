@@ -6,10 +6,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.json.JSONObject;
 
+import com.example.api.util.JwtUtil;
 import com.example.data.User;
 import com.example.errors.NotFoundException;
 import com.example.logic.Logic;
@@ -26,37 +26,23 @@ public class GetUserInfoServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-            String username;
+            // Validar el token de la cabecera Authorization
+            String userId = JwtUtil.validateAuthorizationHeader(request.getHeader("Authorization"));
 
-            // Verificar si se proporciona un parámetro username
-            String requestedUsername = request.getParameter("username");
+            if (userId == null) {
+                JSONObject jsonResponse = new JSONObject();
+                jsonResponse.put("success", false);
+                jsonResponse.put("error", "Unauthorized");
+                jsonResponse.put("message", "Invalid or expired token");
 
-            if (requestedUsername != null && !requestedUsername.isEmpty()) {
-                // Consultar usuario específico por parámetro
-                username = requestedUsername;
-            } else {
-                // Si no hay parámetro, verificar sesión (usuario actual)
-                HttpSession session = request.getSession(false);
-
-                if (session == null || session.getAttribute("username") == null) {
-                    // No hay sesión activa y no se proporcionó username
-                    JSONObject jsonResponse = new JSONObject();
-                    jsonResponse.put("success", false);
-                    jsonResponse.put("error", "Unauthorized");
-                    jsonResponse.put("message", "No active session and no username provided");
-
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write(jsonResponse.toString());
-                    return;
-                }
-
-                // Obtener el username de la sesión
-                username = (String) session.getAttribute("username");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write(jsonResponse.toString());
+                return;
             }
 
-            // Obtener los datos del usuario
+            // Obtener el usuario por el userId del token
             Logic logic = Logic.get();
-            User user = logic.getUserByUsername(username);
+            User user = logic.getUserById(userId);
 
             // Respuesta exitosa con los datos del usuario
             JSONObject jsonResponse = new JSONObject();

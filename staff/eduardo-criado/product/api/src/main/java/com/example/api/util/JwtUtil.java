@@ -37,4 +37,13 @@ public class JwtUtil {
             return null;
         }
     }
+
+    public static String validateAuthorizationHeader(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null; // Retornar null cuando NO es válido
+        }
+
+        String token = authHeader.substring(7);
+        return validateToken(token);
+    }
 }

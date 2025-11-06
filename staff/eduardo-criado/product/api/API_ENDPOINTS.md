@@ -9,7 +9,7 @@ http://localhost:8080/api
 
 ## 1. Registro de Usuario
 
-### `POST /register`
+### `POST /users`
 
 Registra un nuevo usuario en el sistema.
 
@@ -24,12 +24,9 @@ Registra un nuevo usuario en el sistema.
 
 **Respuestas:**
 
-**201 Created** - Usuario registrado exitosamente
-```json
-{
-  "success": true,
-  "message": "User registered successfully"
-}
+**201 Created** - Usuario registrado exitosamente (sin body)
+```
+HTTP/1.1 201 Created
 ```
 
 **409 Conflict** - Usuario ya existe
@@ -41,20 +38,29 @@ Registra un nuevo usuario en el sistema.
 }
 ```
 
+**500 Internal Server Error** - Error del servidor
+```json
+{
+  "success": false,
+  "error": "InternalServerError",
+  "message": "Error message"
+}
+```
+
 **Ejemplo curl:**
 ```bash
-curl -X POST http://localhost:8080/api/register \
+curl -X POST http://localhost:8080/api/users \
   -H "Content-Type: application/json" \
   -d '{"name":"Juan Pérez","username":"juanperez","password":"pass123"}'
 ```
 
 ---
 
-## 2. Login
+## 2. Autenticación (Login)
 
-### `POST /login`
+### `POST /users/auth`
 
-Inicia sesión y crea una sesión HTTP.
+Autentica al usuario y devuelve un token JWT para autenticación en peticiones subsecuentes.
 
 **Request Body:**
 ```json
@@ -66,13 +72,10 @@ Inicia sesión y crea una sesión HTTP.
 
 **Respuestas:**
 
-**200 OK** - Login exitoso
+**200 OK** - Autenticación exitosa
 ```json
 {
-  "success": true,
-  "message": "Login successful",
-  "name": "Juan Pérez",
-  "username": "juanperez"
+  "token": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFucGVyZXoiLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MTcwMDA4NjQwMH0.abc123..."
 }
 ```
 
@@ -87,27 +90,23 @@ Inicia sesión y crea una sesión HTTP.
 
 **Ejemplo curl:**
 ```bash
-curl -X POST http://localhost:8080/api/login \
+curl -X POST http://localhost:8080/api/users/auth \
   -H "Content-Type: application/json" \
-  -c cookies.txt \
   -d '{"username":"juanperez","password":"pass123"}'
 ```
 
-**Nota:** Usa `-c cookies.txt` para guardar la sesión en un archivo.
+**Nota:** Guarda el token devuelto para usarlo en las peticiones subsecuentes que requieren autenticación.
 
 ---
 
-## 3. Obtener Usuario
+## 3. Obtener Información de Usuario
 
-### `GET /user` o `GET /user?username=xxx`
+### `GET /users/info`
 
-Obtiene los datos de un usuario. Tiene dos modos de uso:
+Obtiene los datos del usuario autenticado según el token JWT. **Requiere autenticación JWT.**
 
-1. **Sin parámetros:** Devuelve el usuario actualmente logueado (requiere sesión activa)
-2. **Con parámetro `username`:** Devuelve el usuario especificado (público)
-
-**Parámetros de Query (opcionales):**
-- `username` - Username del usuario a consultar
+**Headers requeridos:**
+- `Authorization: Bearer <token>` - Token JWT obtenido al autenticarse
 
 **Respuestas:**
 
@@ -120,12 +119,12 @@ Obtiene los datos de un usuario. Tiene dos modos de uso:
 }
 ```
 
-**401 Unauthorized** - No hay sesión activa y no se proporcionó username
+**401 Unauthorized** - Token inválido o expirado
 ```json
 {
   "success": false,
   "error": "Unauthorized",
-  "message": "No active session and no username provided"
+  "message": "Invalid or expired token"
 }
 ```
 
@@ -138,23 +137,22 @@ Obtiene los datos de un usuario. Tiene dos modos de uso:
 }
 ```
 
-**Ejemplos curl:**
+**Ejemplo curl:**
 ```bash
-# Obtener usuario actual (requiere sesión)
-curl -X GET http://localhost:8080/api/user \
-  -b cookies.txt
-
-# Obtener usuario específico (público)
-curl -X GET "http://localhost:8080/api/user?username=juanperez"
+curl -X GET http://localhost:8080/api/users/info \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
 ---
 
 ## 4. Obtener Todos los Usuarios
 
-### `GET /users`
+### `GET /users/all`
 
-Obtiene la lista de todos los usuarios registrados en el sistema.
+Obtiene la lista de todos los usuarios registrados en el sistema. **Requiere autenticación JWT.**
+
+**Headers requeridos:**
+- `Authorization: Bearer <token>` - Token JWT obtenido al autenticarse
 
 **Respuestas:**
 
@@ -176,73 +174,95 @@ Obtiene la lista de todos los usuarios registrados en el sistema.
 }
 ```
 
+**401 Unauthorized** - Token inválido o expirado
+```json
+{
+  "success": false,
+  "error": "Unauthorized",
+  "message": "Invalid or expired token"
+}
+```
+
 **Nota:** Por seguridad, las contraseñas NO se incluyen en la respuesta.
 
 **Ejemplo curl:**
 ```bash
-curl -X GET http://localhost:8080/api/users
+curl -X GET http://localhost:8080/api/users/all \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
 
 ---
 
-## 5. Logout
+## Autenticación JWT
 
-### `POST /logout`
+La API usa **JSON Web Tokens (JWT)** para autenticación:
 
-Cierra la sesión actual.
+### ¿Cómo funciona?
 
-**Respuestas:**
+1. **Autenticación:** El cliente envía credenciales a `POST /users/auth`
+2. **Token:** El servidor valida las credenciales y devuelve un token JWT
+3. **Almacenamiento:** El cliente guarda el token (en localStorage, memoria, etc.)
+4. **Uso:** El cliente incluye el token en el header `Authorization: Bearer <token>` en cada petición
+5. **Validación:** El servidor valida el token en cada petición protegida
+6. **Expiración:** Los tokens expiran después de 24 horas
 
-**200 OK** - Logout exitoso
-```json
-{
-  "success": true,
-  "message": "Logout successful"
-}
-```
+### Endpoints que requieren autenticación JWT:
+- `GET /users/all` - Obtener todos los usuarios
+- `GET /users/info` - Obtener información de usuario
 
-**Ejemplo curl:**
-```bash
-curl -X POST http://localhost:8080/api/logout \
-  -b cookies.txt
-```
+### Endpoints públicos (no requieren autenticación):
+- `POST /users` - Registro de usuario
+- `POST /users/auth` - Autenticación (login)
 
----
-
-## Gestión de Sesiones
-
-La API usa **sesiones HTTP** para mantener el estado del usuario logueado:
-
-- Al hacer login exitoso, se crea una sesión en el servidor
-- La sesión almacena el `username` del usuario logueado
-- Las cookies de sesión se envían automáticamente en las peticiones subsecuentes
-- Al hacer logout, la sesión se invalida
-
-### Usando sesiones desde una aplicación Java (Swing)
-
-Desde una aplicación Java cliente (como tu App Swing), NO puedes usar las sesiones HTTP directamente porque cada petición HTTP se hace de forma independiente.
-
-**Soluciones para el cliente Java:**
-1. **Opción Simple (actual):** Guardar los datos del usuario en memoria local después del login
-2. **Opción con tokens:** Implementar autenticación basada en tokens JWT
-3. **Opción con cookies:** Usar `CookieManager` en Java para manejar las cookies de sesión
+### Ventajas de JWT:
+- ✅ Stateless - No requiere almacenar sesiones en el servidor
+- ✅ Escalable - Funciona en múltiples servidores
+- ✅ Compatible con aplicaciones web y móviles
+- ✅ Fácil de integrar con aplicaciones frontend (localStorage)
 
 ---
 
 ## Flujo de Trabajo Recomendado
 
-### Para usar desde el navegador o herramientas (Postman, curl):
-1. POST `/register` - Registrar usuario
-2. POST `/login` - Iniciar sesión (guarda la cookie)
-3. GET `/user` - Obtener datos del usuario actual (usa la cookie)
-4. GET `/users` - Obtener todos los usuarios registrados
-5. POST `/logout` - Cerrar sesión
+### Flujo completo con JWT:
 
-### Para usar desde la App Swing:
-1. POST `/register` - Registrar usuario
-2. POST `/login` - Iniciar sesión y **guardar el nombre en memoria local**
-3. Usar el nombre guardado localmente (no necesitas llamar a `/user`)
-4. No necesitas `/logout` (opcional)
+1. **Registrar usuario:**
+   ```bash
+   curl -X POST http://localhost:8080/api/users \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Juan Pérez","username":"juanperez","password":"pass123"}'
+   ```
+
+2. **Autenticarse y obtener token:**
+   ```bash
+   curl -X POST http://localhost:8080/api/users/auth \
+     -H "Content-Type: application/json" \
+     -d '{"username":"juanperez","password":"pass123"}'
+   ```
+   Respuesta: `{"token":"Bearer eyJhbGci..."}`
+
+3. **Guardar el token** en localStorage (web) o en memoria (app)
+
+4. **Usar el token en peticiones protegidas:**
+   ```bash
+   # Obtener info del usuario autenticado
+   curl -X GET http://localhost:8080/api/users/info \
+     -H "Authorization: Bearer eyJhbGci..."
+
+   # Obtener todos los usuarios
+   curl -X GET http://localhost:8080/api/users/all \
+     -H "Authorization: Bearer eyJhbGci..."
+   ```
+
+### Para aplicaciones web:
+- Almacenar el token en `localStorage` o `sessionStorage`
+- Incluir el token en el header `Authorization` en cada petición
+- Eliminar el token al hacer logout
+
+### Para aplicaciones Swing/Java:
+- Guardar el token en memoria después de autenticarse
+- Incluir el token en el header de cada HttpURLConnection
+- Limpiar el token al cerrar sesión
 
 ---
 

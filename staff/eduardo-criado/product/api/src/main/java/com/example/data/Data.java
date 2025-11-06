@@ -35,6 +35,15 @@ public class Data {
         return null; // User not found
     }
 
+    public User findUserById(String id) {
+        for (User user : users) {
+            if (user != null && user.getId().equals(id)) {
+                return user;
+            }
+        }
+        return null; // User not found
+    }
+
     public User[] getAllUsers() {
         // return null;
         return users;

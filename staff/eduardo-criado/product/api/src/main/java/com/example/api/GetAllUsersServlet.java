@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.example.api.util.JwtUtil;
 import com.example.data.User;
 import com.example.logic.Logic;
 
@@ -25,6 +26,20 @@ public class GetAllUsersServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
+            // Validar el token de la cabecera Authorization
+            String userId = JwtUtil.validateAuthorizationHeader(request.getHeader("Authorization"));
+
+            if (userId == null) {
+                JSONObject jsonResponse = new JSONObject();
+                jsonResponse.put("success", false);
+                jsonResponse.put("error", "Unauthorized");
+                jsonResponse.put("message", "Invalid or expired token");
+
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write(jsonResponse.toString());
+                return;
+            }
+
             // Obtener todos los usuarios
             Logic logic = Logic.get();
             User[] users = logic.getAllUsers();
