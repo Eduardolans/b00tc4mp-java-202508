@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="logic.LogicTest" time="0.074" tests="2" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="logic.LogicTest" time="0.282" tests="4" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="24"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/jdk-24.0.2-oracle-x64/lib"/>
-    <property name="sun.java.command" value="/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/surefire/surefirebooter-20251014143945203_3.jar /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/surefire 2025-10-14T14-39-45_037-jvmRun1 surefire-20251014143945203_1tmp surefire_0-20251014143945203_2tmp"/>
+    <property name="sun.java.command" value="/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/surefire/surefirebooter-20251106221608111_3.jar /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/surefire 2025-11-06T22-16-08_037-jvmRun1 surefire-20251106221608111_1tmp surefire_0-20251106221608111_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/test-classes:/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/classes:/home/eddy-c/.m2/repository/org/json/json/20240303/json-20240303.jar:/home/eddy-c/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/home/eddy-c/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/eddy-c/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:/home/eddy-c/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/eddy-c/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/home/eddy-c/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:/home/eddy-c/.m2/repository/org/mockito/mockito-core/5.5.0/mockito-core-5.5.0.jar:/home/eddy-c/.m2/repository/net/bytebuddy/byte-buddy/1.14.6/byte-buddy-1.14.6.jar:/home/eddy-c/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.6/byte-buddy-agent-1.14.6.jar:/home/eddy-c/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar:/home/eddy-c/.m2/repository/org/mockito/mockito-junit-jupiter/5.5.0/mockito-junit-jupiter-5.5.0.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -27,7 +27,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/surefire/surefirebooter-20251014143945203_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/app/target/surefire/surefirebooter-20251106221608111_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="24.0.2+12-54"/>
     <property name="user.name" value="eddy-c"/>
@@ -53,15 +53,30 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="68.0"/>
   </properties>
-  <testcase name="testRegisterUser_Success" classname="logic.LogicTest" time="0.042">
-    <system-out><![CDATA[🔧 Test iniciado
-✅ Test finalizado
+  <testcase name="testRegisterUser_Success" classname="logic.LogicTest" time="0.219">
+    <system-out><![CDATA[⚠️  NOTE: These tests require the API to be running on http://localhost:8080
+   Start the API with: cd api && mvn jetty:run
+
+🔧 Test #1 iniciado
+✅ Test #1 finalizado
 
 ]]></system-out>
   </testcase>
-  <testcase name="testRegisterUser_DuplicateUsername" classname="logic.LogicTest" time="0.004">
-    <system-out><![CDATA[🔧 Test iniciado
-✅ Test finalizado
+  <testcase name="testRegisterUser_DuplicateUsername" classname="logic.LogicTest" time="0.008">
+    <system-out><![CDATA[🔧 Test #2 iniciado
+✅ Test #2 finalizado
+
+]]></system-out>
+  </testcase>
+  <testcase name="testLoginUser_Success" classname="logic.LogicTest" time="0.009">
+    <system-out><![CDATA[🔧 Test #3 iniciado
+✅ Test #3 finalizado
+
+]]></system-out>
+  </testcase>
+  <testcase name="testLoginUser_InvalidCredentials" classname="logic.LogicTest" time="0.01">
+    <system-out><![CDATA[🔧 Test #4 iniciado
+✅ Test #4 finalizado
 
 ]]></system-out>
   </testcase>

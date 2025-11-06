@@ -7,6 +7,8 @@
     <artifactId>app</artifactId>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <exec.mainClass>App</exec.mainClass>
@@ -68,8 +70,9 @@
                 <configuration>
                     <sourceDirectory>src/main/java</sourceDirectory>
                     <testSourceDirectory>src/test/java</testSourceDirectory>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <release>17</release>
+                    <!-- <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target> -->
                 </configuration>
             </plugin>
 

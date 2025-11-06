@@ -135,7 +135,13 @@ public class App extends JFrame {
 
                 JOptionPane.showMessageDialog(this, exception.getMessage(), "Message", JOptionPane.ERROR_MESSAGE);
 
-                // JOptionPane.showMessageDialog(this, exception.getMessage());
+                nameField.setText("");
+                usernameField.setText("");
+                passwordField.setText("");
+            } catch (ConnectionException | ServerException | ClientException exception) {
+                exception.printStackTrace();
+
+                JOptionPane.showMessageDialog(this, "Error: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 
                 nameField.setText("");
                 usernameField.setText("");
@@ -212,7 +218,7 @@ public class App extends JFrame {
                             + "</div></html>");
                 } catch (ConnectionException | ServerException | ClientException | ContentException e) {
                     e.printStackTrace();
-                    
+
                     quoteLabel
                             .setText("<html><div style='width: 300px; text-align: center;'>Could not load daily quote: "
                                     + e.getMessage() + "</div></html>");
@@ -220,7 +226,7 @@ public class App extends JFrame {
 
                 cardLayout.show(cardPanel, HOME_VIEW);
 
-                
+
             } catch (NotFoundException exception) {
                 exception.printStackTrace();
 
@@ -230,6 +236,10 @@ public class App extends JFrame {
                 exception.printStackTrace();
 
                 JOptionPane.showMessageDialog(this, exception.getMessage());
+            } catch (ConnectionException | ServerException | ClientException | ContentException exception) {
+                exception.printStackTrace();
+
+                JOptionPane.showMessageDialog(this, "Error: " + exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 

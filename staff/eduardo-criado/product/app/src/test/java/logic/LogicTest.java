@@ -7,17 +7,32 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import data.Data;
-import data.User;
+import errors.CredentialsException;
 import errors.DuplicityException;
 
+/**
+ * Integration tests for Logic class with REST API
+ * NOTE: These tests require the API to be running on http://localhost:8080
+ * Start the API with: cd api && mvn jetty:run
+ */
 class LogicTest {
 
+    private static int testCounter = 0;
+
+    @BeforeAll
+    static void checkApiRunning() {
+        System.out.println("⚠️  NOTE: These tests require the API to be running on http://localhost:8080");
+        System.out.println("   Start the API with: cd api && mvn jetty:run\n");
+    }
+
     private Logic logic;
+
     private Data data;
 
     @BeforeEach
@@ -29,7 +44,8 @@ class LogicTest {
         resetDataSingleton();
         data = Data.get();
 
-        System.out.println("🔧 Test iniciado");
+        testCounter++;
+        System.out.println("🔧 Test #" + testCounter + " iniciado");
     }
 
     @AfterEach
@@ -39,36 +55,86 @@ class LogicTest {
         resetLogicSingleton();
         resetDataSingleton();
 
-        System.out.println("✅ Test finalizado\n");
+        System.out.println("✅ Test #" + testCounter + " finalizado\n");
     }
 
     @Test
-    @DisplayName("Should register a new user successfully")
+    @DisplayName("Should register a new user successfully via API")
     void testRegisterUser_Success() {
-        String name = "John Doe";
-        String username = "johndoe";
+        String name = "John Doe Test";
+        String username = "johndoe_test_" + System.currentTimeMillis(); // Unique username
         String password = "password123";
 
-        assertDoesNotThrow(() -> logic.registerUser(name, username, password));
+        // Register user via API (POST /api/users)
+        assertDoesNotThrow(() -> logic.registerUser(name, username, password),
+                "Registration should succeed");
 
-        User registeredUser = data.findUserByUsername(username);
-        assertNotNull(registeredUser, "User should be registered in data");
-        assertEquals(name, registeredUser.getName());
-        assertEquals(username, registeredUser.getUsername());
-        assertEquals(password, registeredUser.getPassword());
+        // Verify by attempting to login with the new user (POST /api/users/auth)
+        assertDoesNotThrow(() -> logic.loginUser(username, password),
+                "Login should succeed with newly registered user");
+
+        // Verify token was saved in Data
+        assertNotNull(data.getToken(), "Token should be saved in Data after login");
+
+        // Verify we can get user info with the token (GET /api/users/info)
+        assertDoesNotThrow(() -> {
+            String retrievedName = logic.getUsername();
+            assertEquals(name, retrievedName, "Retrieved name should match registered name");
+        }, "Should retrieve user info successfully");
     }
 
     @Test
     @DisplayName("Should throw DuplicityException when username already exists")
     void testRegisterUser_DuplicateUsername() {
-        String username = "johndoe";
-        assertDoesNotThrow(() -> logic.registerUser("John Doe", username, "password123"));
+        String name = "Jane Doe Test";
+        String username = "janedoetest" + System.currentTimeMillis(); // Unique username
+        String password = "password123";
 
+        // First registration should succeed
+        assertDoesNotThrow(() -> logic.registerUser(name, username, password),
+                "First registration should succeed");
+
+        // Second registration with same username should fail
         DuplicityException exception = assertThrows(
                 DuplicityException.class,
-                () -> logic.registerUser("Jane Doe", username, "anotherpass"));
+                () -> logic.registerUser("Another Name", username, "anotherpass"),
+                "Second registration with same username should throw DuplicityException");
 
         assertEquals("user already exists", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw CredentialsException for invalid login")
+    void testLoginUser_InvalidCredentials() {
+        String username = "nonexistent_user_" + System.currentTimeMillis();
+        String password = "wrongpassword";
+
+        // Login with non-existent user should fail
+        CredentialsException exception = assertThrows(
+                CredentialsException.class,
+                () -> logic.loginUser(username, password),
+                "Login with invalid credentials should throw CredentialsException");
+
+        assertEquals("invalid credentials", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should login successfully and save token in Data")
+    void testLoginUser_Success() {
+        String name = "Login Test User";
+        String username = "logintestuser" + System.currentTimeMillis();
+        String password = "testpass123";
+
+        // Register user first
+        assertDoesNotThrow(() -> logic.registerUser(name, username, password));
+
+        // Login should succeed
+        assertDoesNotThrow(() -> logic.loginUser(username, password));
+
+        // Token should be saved in Data
+        assertNotNull(data.getToken(), "Token should be saved in Data");
+        assertEquals(true, data.getToken().startsWith("Bearer "),
+                "Token should start with 'Bearer '");
     }
 
     private void resetLogicSingleton() throws Exception {

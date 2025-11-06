@@ -31,7 +31,7 @@ public class Logic {
         return instance;
     }
 
-    private String username;
+    private static final String API_URL = "http://localhost:8080/api";
 
     private Logic() {
     }
@@ -76,50 +76,127 @@ public class Logic {
         }
     }
 
-    public void registerUser(String name, String username, String password) throws DuplicityException {
+    public void registerUser(String name, String username, String password) throws DuplicityException, ConnectionException, ServerException, ClientException {
+        try {
+            URL url = new URL(API_URL + "/users");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
 
-        // this.username = username;
+            // Create JSON body
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("name", name);
+            jsonBody.put("username", username);
+            jsonBody.put("password", password);
 
-        Data data = Data.get();
+            // Send request
+            conn.getOutputStream().write(jsonBody.toString().getBytes("UTF-8"));
 
-        User user = data.findUserByUsername(username);
+            int responseCode = conn.getResponseCode();
 
-        if (user != null) {
-            throw new DuplicityException("user already exists");
+            if (responseCode == 409) {
+                throw new DuplicityException("user already exists");
+            } else if (responseCode >= 500) {
+                throw new ServerException("Server error occurred with code: " + responseCode);
+            } else if (responseCode >= 400) {
+                throw new ClientException("Client error occurred with code: " + responseCode);
+            }
+
+            conn.disconnect();
+
+        } catch (IOException e) {
+            throw new ConnectionException("Failed to connect to API: " + e.getMessage());
         }
-
-        user = new User(name, username, password);
-
-        data.addUser(user);
-
     }
 
-    public void loginUser(String username, String password) throws NotFoundException, CredentialsException {
-        Data data = Data.get();
+    public void loginUser(String username, String password) throws CredentialsException, ConnectionException, ServerException, ClientException, ContentException {
+        try {
+            URL url = new URL(API_URL + "/users/auth");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
 
-        User user = data.findUserByUsername(username);
+            // Create JSON body
+            JSONObject jsonBody = new JSONObject();
+            jsonBody.put("username", username);
+            jsonBody.put("password", password);
 
-        if (user == null) {
-            throw new CredentialsException("user not found");
+            // Send request
+            conn.getOutputStream().write(jsonBody.toString().getBytes("UTF-8"));
+
+            int responseCode = conn.getResponseCode();
+
+            if (responseCode == 401) {
+                throw new CredentialsException("invalid credentials");
+            } else if (responseCode >= 500) {
+                throw new ServerException("Server error occurred with code: " + responseCode);
+            } else if (responseCode >= 400) {
+                throw new ClientException("Client error occurred with code: " + responseCode);
+            }
+
+            // Read response
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            conn.disconnect();
+
+            // Parse JSON and extract token
+            JSONObject jsonResponse = new JSONObject(content.toString());
+            Data data = Data.get();
+            data.setToken(jsonResponse.getString("token")); // Token comes as "Bearer XXX"
+
+        } catch (IOException e) {
+            throw new ConnectionException("Failed to connect to API: " + e.getMessage());
+        } catch (JSONException e) {
+            throw new ContentException("Error parsing response: " + e.getMessage());
         }
-
-        if (!user.getPassword().equals(password)) {
-            throw new CredentialsException("invalid password");
-        }
-
-        this.username = username;
-
     }
 
-    public String getUsername() throws NotFoundException {
-        Data data = Data.get();
-        User user = data.findUserByUsername(this.username);
+    public String getUsername() throws NotFoundException, ConnectionException, ServerException, ClientException, ContentException {
+        try {
+            Data data = Data.get();
+            String token = data.getToken();
 
-        if (user == null) {
-            throw new NotFoundException("user not found");
+            URL url = new URL(API_URL + "/users/info");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", token); // Token already includes "Bearer"
+
+            int responseCode = conn.getResponseCode();
+
+            if (responseCode == 401) {
+                throw new NotFoundException("user not found or token expired");
+            } else if (responseCode >= 500) {
+                throw new ServerException("Server error occurred with code: " + responseCode);
+            } else if (responseCode >= 400) {
+                throw new ClientException("Client error occurred with code: " + responseCode);
+            }
+
+            // Read response
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            conn.disconnect();
+
+            // Parse JSON and extract name
+            JSONObject jsonResponse = new JSONObject(content.toString());
+            return jsonResponse.getString("name");
+
+        } catch (IOException e) {
+            throw new ConnectionException("Failed to connect to API: " + e.getMessage());
+        } catch (JSONException e) {
+            throw new ContentException("Error parsing response: " + e.getMessage());
         }
-
-        return user.getName();
     }
 
 }

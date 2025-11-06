@@ -11,6 +11,7 @@ public class Data {
     }
 
     private User[] users;
+    private String token;
 
     private Data() {
         users = new User[100];
@@ -38,5 +39,13 @@ public class Data {
     public User[] getAllUsers() {
         // return null;
         return users;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
     }
 }
