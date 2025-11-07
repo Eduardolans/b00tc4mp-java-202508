@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import data.Data;
+import data.User;
 import errors.CredentialsException;
 import errors.DuplicityException;
 
@@ -133,8 +135,78 @@ class LogicTest {
 
         // Token should be saved in Data
         assertNotNull(data.getToken(), "Token should be saved in Data");
-        assertEquals(true, data.getToken().startsWith("Bearer "),
-                "Token should start with 'Bearer '");
+        assertTrue(data.getToken().startsWith("Bearer "), "Token should start with 'Bearer '");
+
+        // Verify we can get user info with the token (GET /api/users/info)
+        assertDoesNotThrow(() -> {
+            String retrievedName = logic.getUsername();
+            assertEquals(name, retrievedName, "Retrieved name should match registered name");
+        }, "Should retrieve user info successfully");
+    }
+
+    @Test
+    @DisplayName("Should get all users successfully")
+    void testGetAllUsers_Success() {
+
+        // Registra 2 usuarios
+        // Hace login
+        // Obtiene todos los usuarios
+        // Verifica que ambos están en la lista
+
+        String name1 = "User One";
+        String username1 = "userone" + System.currentTimeMillis();
+        String password1 = "pass123";
+
+        String name2 = "User Two";
+        String username2 = "usertwo" + System.currentTimeMillis();
+        String password2 = "pass456";
+
+        // Register two users
+        assertDoesNotThrow(() -> logic.registerUser(name1, username1, password1));
+        assertDoesNotThrow(() -> logic.registerUser(name2, username2, password2));
+
+        // Login with first user
+        assertDoesNotThrow(() -> logic.loginUser(username1, password1));
+
+        // Get all users
+        assertDoesNotThrow(() -> {
+            User[] users = logic.getAllUsers();
+            assertNotNull(users, "Users array should not be null");
+            assertTrue(users.length >= 2, "Should have at least 2 users");
+
+            // Verify our users are in the list
+            boolean foundUser1 = false;
+            boolean foundUser2 = false;
+            for (User user : users) {
+                if (user.getUsername().equals(username1)) {
+                    foundUser1 = true;
+                    assertEquals(name1, user.getName(), "User 1 name should match");
+                }
+                if (user.getUsername().equals(username2)) {
+                    foundUser2 = true;
+                    assertEquals(name2, user.getName(), "User 2 name should match");
+                }
+            }
+            assertTrue(foundUser1, "User 1 should be in the list");
+            assertTrue(foundUser2, "User 2 should be in the list");
+        }, "Should retrieve all users successfully");
+    }
+
+    @Test
+    @DisplayName("Should get daily quote successfully")
+    void testGetDailyQuote_Success() {
+
+        // Obtiene quote del día
+        // Verifica formato correcto
+
+        // Test the external API call
+        assertDoesNotThrow(() -> {
+            String quote = logic.getDailyQuote();
+            assertNotNull(quote, "Quote should not be null");
+            assertTrue(quote.length() > 0, "Quote should not be empty");
+            assertTrue(quote.contains("\""), "Quote should contain quotation marks");
+            assertTrue(quote.contains("—"), "Quote should contain author separator");
+        }, "Should retrieve daily quote successfully");
     }
 
     private void resetLogicSingleton() throws Exception {

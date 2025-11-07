@@ -24,14 +24,14 @@ public class Logic {
 
     private static Logic instance;
 
+    private static final String API_URL = "http://localhost:8080/api";
+
     public static Logic get() {
         if (instance == null) {
             instance = new Logic();
         }
         return instance;
     }
-
-    private static final String API_URL = "http://localhost:8080/api";
 
     private Logic() {
     }
@@ -76,7 +76,8 @@ public class Logic {
         }
     }
 
-    public void registerUser(String name, String username, String password) throws DuplicityException, ConnectionException, ServerException, ClientException {
+    public void registerUser(String name, String username, String password)
+            throws DuplicityException, ConnectionException, ServerException, ClientException {
         try {
             URL url = new URL(API_URL + "/users");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -110,7 +111,8 @@ public class Logic {
         }
     }
 
-    public void loginUser(String username, String password) throws CredentialsException, ConnectionException, ServerException, ClientException, ContentException {
+    public void loginUser(String username, String password)
+            throws CredentialsException, ConnectionException, ServerException, ClientException, ContentException {
         try {
             URL url = new URL(API_URL + "/users/auth");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -149,7 +151,8 @@ public class Logic {
             // Parse JSON and extract token
             JSONObject jsonResponse = new JSONObject(content.toString());
             Data data = Data.get();
-            data.setToken(jsonResponse.getString("token")); // Token comes as "Bearer XXX"
+            String token = jsonResponse.getString("token");
+            data.setToken("Bearer " + token);
 
         } catch (IOException e) {
             throw new ConnectionException("Failed to connect to API: " + e.getMessage());
@@ -158,7 +161,8 @@ public class Logic {
         }
     }
 
-    public String getUsername() throws NotFoundException, ConnectionException, ServerException, ClientException, ContentException {
+    public String getUsername()
+            throws NotFoundException, ConnectionException, ServerException, ClientException, ContentException {
         try {
             Data data = Data.get();
             String token = data.getToken();
@@ -191,6 +195,65 @@ public class Logic {
             // Parse JSON and extract name
             JSONObject jsonResponse = new JSONObject(content.toString());
             return jsonResponse.getString("name");
+
+        } catch (IOException e) {
+            throw new ConnectionException("Failed to connect to API: " + e.getMessage());
+        } catch (JSONException e) {
+            throw new ContentException("Error parsing response: " + e.getMessage());
+        }
+    }
+
+    public User[] getAllUsers()
+            throws NotFoundException, ConnectionException, ServerException, ClientException, ContentException {
+
+        // Obtiene todos los usuarios de la API
+        // Hace GET a /api/users/all con token JWT
+        // Devuelve array de User[]
+
+        try {
+            Data data = Data.get();
+            String token = data.getToken();
+
+            URL url = new URL(API_URL + "/users/all");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", token);
+
+            int responseCode = conn.getResponseCode();
+
+            if (responseCode == 401) {
+                throw new NotFoundException("user not found or token expired");
+            } else if (responseCode == 404) {
+                throw new NotFoundException("user not found");
+            } else if (responseCode >= 500) {
+                throw new ServerException("Server error occurred with code: " + responseCode);
+            } else if (responseCode >= 400) {
+                throw new ClientException("Client error occurred with code: " + responseCode);
+            }
+
+            // Read response
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            conn.disconnect();
+
+            // Parse JSON array directly (no wrapper object)
+            JSONArray jsonArray = new JSONArray(content.toString());
+            User[] users = new User[jsonArray.length()];
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject userJson = jsonArray.getJSONObject(i);
+                String name = userJson.getString("name");
+                String username = userJson.getString("username");
+                // Password is not included in API response for security
+                users[i] = new User(name, username, null);
+            }
+
+            return users;
 
         } catch (IOException e) {
             throw new ConnectionException("Failed to connect to API: " + e.getMessage());
