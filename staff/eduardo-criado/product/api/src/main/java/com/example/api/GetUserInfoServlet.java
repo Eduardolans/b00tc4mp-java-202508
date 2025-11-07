@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 
-import com.example.api.util.JwtUtil;
+import com.example.api.helper.JwtHelper;
 import com.example.data.User;
 import com.example.errors.NotFoundException;
 import com.example.logic.Logic;
@@ -27,11 +27,10 @@ public class GetUserInfoServlet extends HttpServlet {
 
         try {
             // Validar el token de la cabecera Authorization
-            String userId = JwtUtil.validateAuthorizationHeader(request.getHeader("Authorization"));
+            String userId = JwtHelper.validateTokenAndGetUserId(request.getHeader("Authorization"));
 
             if (userId == null) {
                 JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("success", false);
                 jsonResponse.put("error", "Unauthorized");
                 jsonResponse.put("message", "Invalid or expired token");
 
@@ -42,11 +41,10 @@ public class GetUserInfoServlet extends HttpServlet {
 
             // Obtener el usuario por el userId del token
             Logic logic = Logic.get();
-            User user = logic.getUserById(userId);
+            User user = logic.getUserInfo(userId);
 
             // Respuesta exitosa con los datos del usuario
             JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("success", true);
             jsonResponse.put("name", user.getName());
             jsonResponse.put("username", user.getUsername());
 
@@ -56,7 +54,6 @@ public class GetUserInfoServlet extends HttpServlet {
         } catch (NotFoundException e) {
             // Usuario no encontrado
             JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("success", false);
             jsonResponse.put("error", "NotFoundException");
             jsonResponse.put("message", e.getMessage());
 

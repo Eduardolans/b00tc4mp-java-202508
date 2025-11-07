@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 
-import com.example.api.util.JwtUtil;
+import com.example.api.helper.JwtHelper;
 import com.example.errors.CredentialsException;
 import com.example.errors.NotFoundException;
 import com.example.logic.Logic;
@@ -45,19 +45,18 @@ public class AuthenticateUserServlet extends HttpServlet {
             Logic logic = Logic.get();
             String userId = logic.authenticateUser(username, password);
 
-            String token = JwtUtil.generateToken(userId);
+            String token = JwtHelper.generateTokenWithUserId(userId);
 
             // Respuesta exitosa con el nombre del usuario
             JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("token", "Bearer " + token);
+            jsonResponse.put("token", token);
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(jsonResponse.toString());
 
         } catch (CredentialsException | NotFoundException e) {
-            // Credenciales inválidas
+            // Credenciales inválidas o Usuario no encontrado
             JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("success", false);
             jsonResponse.put("error", "CredentialsException");
             jsonResponse.put("message", e.getMessage());
 

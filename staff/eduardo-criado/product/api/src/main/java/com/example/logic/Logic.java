@@ -63,9 +63,9 @@ public class Logic {
         return user;
     }
 
-    public User getUserById(String id) throws NotFoundException {
+    public User getUserInfo(String userId) throws NotFoundException {
         Data data = Data.get();
-        User user = data.findUserById(id);
+        User user = data.findUserById(userId);
 
         if (user == null) {
             throw new NotFoundException("user not found");
@@ -74,8 +74,14 @@ public class Logic {
         return user;
     }
 
-    public User[] getAllUsers() {
+    public User[] getAllUsers(String userId) throws NotFoundException {
         Data data = Data.get();
+        User user = data.findUserById(userId);
+
+        if (user == null) {
+            throw new NotFoundException("user not found");
+
+        }
         return data.getAllUsers();
     }
 

@@ -10,8 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.example.api.util.JwtUtil;
+import com.example.api.helper.JwtHelper;
 import com.example.data.User;
+import com.example.errors.NotFoundException;
 import com.example.logic.Logic;
 
 @WebServlet("/users/all")
@@ -27,11 +28,10 @@ public class GetAllUsersServlet extends HttpServlet {
 
         try {
             // Validar el token de la cabecera Authorization
-            String userId = JwtUtil.validateAuthorizationHeader(request.getHeader("Authorization"));
+            String userId = JwtHelper.validateTokenAndGetUserId(request.getHeader("Authorization"));
 
             if (userId == null) {
                 JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("success", false);
                 jsonResponse.put("error", "Unauthorized");
                 jsonResponse.put("message", "Invalid or expired token");
 
@@ -42,7 +42,7 @@ public class GetAllUsersServlet extends HttpServlet {
 
             // Obtener todos los usuarios
             Logic logic = Logic.get();
-            User[] users = logic.getAllUsers();
+            User[] users = logic.getAllUsers(userId);
 
             // Crear array JSON con los usuarios
             JSONArray usersArray = new JSONArray();
@@ -57,13 +57,16 @@ public class GetAllUsersServlet extends HttpServlet {
                 }
             }
 
-            // Respuesta exitosa
-            JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("success", true);
-            jsonResponse.put("count", usersArray.length());
-            jsonResponse.put("users", usersArray);
-
             response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write(usersArray.toString());
+
+        } catch (NotFoundException e) {
+            // Usuario no encontrado
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("error", "NotFoundException");
+            jsonResponse.put("message", e.getMessage());
+
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.getWriter().write(jsonResponse.toString());
 
         } catch (Exception e) {

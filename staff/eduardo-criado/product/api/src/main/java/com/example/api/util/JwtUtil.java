@@ -15,9 +15,9 @@ public class JwtUtil {
     private static final long EXPIRATION_TIME = 86400000; // 24 hours
 
     // Generate token
-    public static String generateToken(String userId) {
+    public static String generateToken(String subject) {
         return Jwts.builder()
-                .setSubject(userId)
+                .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SECRET_KEY)
@@ -36,14 +36,5 @@ public class JwtUtil {
         } catch (JwtException e) {
             return null;
         }
-    }
-
-    public static String validateAuthorizationHeader(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return null; // Retornar null cuando NO es válido
-        }
-
-        String token = authHeader.substring(7);
-        return validateToken(token);
     }
 }
