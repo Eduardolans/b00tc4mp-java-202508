@@ -16,6 +16,7 @@ API RESTful para gestión de usuarios con autenticación JWT (JSON Web Tokens).
 - **Java Servlets** (javax.servlet 4.0.1)
 - **JWT** (jjwt 0.11.5)
 - **JSON** (org.json)
+- **JUnit 5** (5.9.3) para tests unitarios
 - **Maven** para gestión de dependencias
 - **Jetty** o **Tomcat** como servidor
 
@@ -31,9 +32,11 @@ api/
 │   │   │   │   ├── AuthenticateUserServlet.java
 │   │   │   │   ├── GetAllUsersServlet.java
 │   │   │   │   ├── GetUserInfoServlet.java
+│   │   │   │   ├── ResetDataServlet.java   # Solo para testing
 │   │   │   │   └── HelloServlet.java
 │   │   │   ├── api/util/         # Utilidades
-│   │   │   │   └── JwtUtil.java
+│   │   │   │   ├── JwtUtil.java
+│   │   │   │   └── JwtHelper.java
 │   │   │   ├── logic/            # Lógica de negocio
 │   │   │   │   └── Logic.java
 │   │   │   ├── data/             # Acceso a datos
@@ -45,12 +48,17 @@ api/
 │   │   │       └── NotFoundException.java
 │   │   └── webapp/WEB-INF/
 │   │       └── web.xml
-│   └── test/bash/                # Tests con curl
-│       ├── register-user.sh
-│       ├── authenticate-user.sh
-│       ├── get-all-users.sh
-│       ├── get-user-info.sh
-│       └── hello.sh
+│   └── test/
+│       ├── java/com/example/     # Tests unitarios (JUnit 5)
+│       │   ├── data/DataTest.java       (13 tests)
+│       │   └── logic/LogicTest.java     (15 tests)
+│       └── bash/                 # Tests de integración (curl)
+│           ├── register-user.sh
+│           ├── authenticate-user.sh
+│           ├── get-all-users.sh
+│           ├── get-user-info.sh
+│           ├── reset-data.sh
+│           └── hello.sh
 ├── pom.xml
 ├── deploy.sh
 ├── API_ENDPOINTS.md              # Documentación detallada de endpoints
@@ -80,6 +88,7 @@ cd /home/eddy-c/workspace/b00tc4mp-java-202508/staff/eduardo-criado/product/api
 ### Públicos (no requieren autenticación):
 - `POST /users` - Registrar usuario
 - `POST /users/auth` - Autenticar y obtener token JWT
+- `POST /test/reset` - Resetear datos (⚠️ solo para testing)
 - `GET /hello` - Endpoint de prueba
 
 ### Protegidos (requieren JWT):
@@ -107,9 +116,11 @@ curl -X POST http://localhost:8080/api/users/auth \
 Respuesta:
 ```json
 {
-  "token": "Bearer eyJhbGciOiJIUzI1NiJ9..."
+  "token": "eyJhbGciOiJIUzI1NiJ9..."
 }
 ```
+
+**Nota:** El cliente debe agregar el prefijo `Bearer ` al token cuando lo use en peticiones.
 
 ### 3. Usar el token en peticiones protegidas
 
@@ -125,9 +136,41 @@ curl -X GET http://localhost:8080/api/users/all \
 
 ## Tests
 
-Ejecutar los tests de bash desde el directorio del proyecto:
+### Tests Unitarios (JUnit 5)
+
+Ejecutar tests unitarios que prueban la lógica de negocio de forma aislada:
 
 ```bash
+cd api
+mvn clean test
+```
+
+**Resultado:**
+```
+[INFO] Running com.example.data.DataTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Running com.example.logic.LogicTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+
+Total: 28 tests
+```
+
+**Características:**
+- ✅ No requieren servidor corriendo
+- ✅ Muy rápidos (~70ms)
+- ✅ Prueban Logic y Data directamente
+- ✅ Usan reflection para resetear singletons
+
+### Tests de Integración (Bash/curl)
+
+Ejecutar tests de integración que prueban la API completa end-to-end:
+
+⚠️ **Requiere que la API esté corriendo** (`mvn jetty:run`)
+
+```bash
+# Resetear datos antes de empezar
+./src/test/bash/reset-data.sh
+
 # Registrar usuarios de prueba
 ./src/test/bash/register-user.sh
 
@@ -143,6 +186,17 @@ Ejecutar los tests de bash desde el directorio del proyecto:
 # Test simple
 ./src/test/bash/hello.sh
 ```
+
+### Diferencias entre Tests
+
+| Tipo | Unitarios | Integración |
+|------|-----------|-------------|
+| **Servidor** | ❌ No requiere | ✅ Requiere corriendo |
+| **Velocidad** | ⚡ Muy rápido | 🐌 Más lento |
+| **HTTP** | ❌ No usa | ✅ Usa HTTP real |
+| **Alcance** | Lógica aislada | Sistema completo |
+
+Ver [TESTS_API_APP.md](../TESTS_API_APP.md) para más detalles sobre las diferencias.
 
 ## Autenticación JWT
 
