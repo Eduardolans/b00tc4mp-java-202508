@@ -35,5 +35,5 @@
 
   
 curl -X GET http://localhost:8080/api/users/all \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxNzJlMzhjMi1jODQ4LTQ0MDUtYTBhNS02ZDQ0ZTVjY2Y2MzgiLCJpYXQiOjE3NjI4NjExMDcsImV4cCI6MTc2Mjk0NzUwN30.GLlDqRZfd66E1CPW-nbjj8VYPwQi2eyuFZcymcXd-h4" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4N2Y1NWU5Ny00YTFmLTRjNzctOTQ4ZS05MDc3Y2U0Mjk1YzkiLCJpYXQiOjE3NjI4NjU1MjQsImV4cCI6MTc2Mjk1MTkyNH0.ZeufxQq-ULKqxtzkOy1RKaIjDNkSu5raQu8h2ugGlVY" \
   -v

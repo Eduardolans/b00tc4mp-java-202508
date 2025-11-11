@@ -152,7 +152,7 @@ public class Logic {
             JSONObject jsonResponse = new JSONObject(content.toString());
             Data data = Data.get();
             String token = jsonResponse.getString("token");
-            data.setToken("Bearer " + token);
+            data.setToken(token);
 
         } catch (IOException e) {
             throw new ConnectionException("Failed to connect to API: " + e.getMessage());
@@ -170,7 +170,7 @@ public class Logic {
             URL url = new URL(API_URL + "/users/info");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("Authorization", token); // Token already includes "Bearer"
+            conn.setRequestProperty("Authorization", "Bearer " + token); // Token already includes "Bearer"
 
             int responseCode = conn.getResponseCode();
 
@@ -217,7 +217,7 @@ public class Logic {
             URL url = new URL(API_URL + "/users/all");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("Authorization", token);
+            conn.setRequestProperty("Authorization", "Bearer " + token);
 
             int responseCode = conn.getResponseCode();
 

@@ -1,5 +1,7 @@
 package com.example.logic;
 
+import java.util.List;
+
 import com.example.data.Data;
 import com.example.data.User;
 import com.example.errors.CredentialsException;
@@ -74,7 +76,7 @@ public class Logic {
         return user;
     }
 
-    public User[] getAllUsers(String userId) throws NotFoundException {
+    public List<User> getAllUsers(String userId) throws NotFoundException {
         Data data = Data.get();
         User user = data.findUserById(userId);
 

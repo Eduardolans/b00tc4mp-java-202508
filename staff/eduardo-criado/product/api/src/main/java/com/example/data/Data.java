@@ -1,5 +1,10 @@
 package com.example.data;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class Data {
     private static Data instance;
 
@@ -10,43 +15,37 @@ public class Data {
         return instance;
     }
 
-    private User[] users;
+    protected Map<String, User> usersByUsername;
+    protected Map<String, User> usersById;
 
     private Data() {
-        users = new User[100];
+        usersByUsername = new HashMap<>();
+        usersById = new HashMap<>();
     }
 
     public boolean addUser(User user) {
-        for (int i = 0; i < users.length; i++) {
-            if (users[i] == null) {
-                users[i] = user;
-                return true;
-            }
+        if (user == null || user.getUsername() == null || user.getId() == null) {
+            return false;
         }
-        return false; // Array is full
+        if (usersByUsername.containsKey(user.getUsername()) || usersById.containsKey(user.getId())) {
+            return false;
+        }
+
+        usersByUsername.put(user.getUsername(), user);
+        usersById.put(user.getId(), user);
+        return true;
     }
 
     public User findUserByUsername(String username) {
-        for (User user : users) {
-            if (user != null && user.getUsername().equals(username)) {
-                return user;
-            }
-        }
-        return null; // User not found
+        return usersByUsername.get(username);
     }
 
     public User findUserById(String id) {
-        for (User user : users) {
-            if (user != null && user.getId().equals(id)) {
-                return user;
-            }
-        }
-        return null; // User not found
+        return usersById.get(id);
     }
 
-    public User[] getAllUsers() {
-        // return null;
-        return users;
+    public List<User> getAllUsers() {
+        return new ArrayList<>(usersById.values());
     }
 
     /**
@@ -54,6 +53,7 @@ public class Data {
      * Clears all users from memory
      */
     public void reset() {
-        users = new User[100];
+        usersByUsername = new HashMap<>();
+        usersById = new HashMap<>();
     }
 }

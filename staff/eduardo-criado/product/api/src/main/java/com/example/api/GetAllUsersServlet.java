@@ -1,6 +1,7 @@
 package com.example.api;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -42,7 +43,7 @@ public class GetAllUsersServlet extends HttpServlet {
 
             // Obtener todos los usuarios
             Logic logic = Logic.get();
-            User[] users = logic.getAllUsers(userId);
+            List<User> users = logic.getAllUsers(userId);
 
             // Crear array JSON con los usuarios
             JSONArray usersArray = new JSONArray();
