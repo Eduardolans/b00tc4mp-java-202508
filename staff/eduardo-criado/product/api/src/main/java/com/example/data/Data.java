@@ -48,4 +48,12 @@ public class Data {
         // return null;
         return users;
     }
+
+    /**
+     * Reset all data - FOR TESTING PURPOSES ONLY
+     * Clears all users from memory
+     */
+    public void reset() {
+        users = new User[100];
+    }
 }

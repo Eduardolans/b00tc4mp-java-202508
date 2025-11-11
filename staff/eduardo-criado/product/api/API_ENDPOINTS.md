@@ -75,14 +75,13 @@ Autentica al usuario y devuelve un token JWT para autenticación en peticiones s
 **200 OK** - Autenticación exitosa
 ```json
 {
-  "token": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFucGVyZXoiLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MTcwMDA4NjQwMH0.abc123..."
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFucGVyZXoiLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MTcwMDA4NjQwMH0.abc123..."
 }
 ```
 
 **401 Unauthorized** - Credenciales inválidas
 ```json
 {
-  "success": false,
   "error": "CredentialsException",
   "message": "invalid credentials"
 }
@@ -95,7 +94,7 @@ curl -X POST http://localhost:8080/api/users/auth \
   -d '{"username":"juanperez","password":"pass123"}'
 ```
 
-**Nota:** Guarda el token devuelto para usarlo en las peticiones subsecuentes que requieren autenticación.
+**Nota:** El token devuelto debe incluir el prefijo `Bearer ` al usarlo en el header `Authorization`. La aplicación cliente debe agregar este prefijo al guardar o enviar el token.
 
 ---
 
@@ -113,7 +112,6 @@ Obtiene los datos del usuario autenticado según el token JWT. **Requiere autent
 **200 OK** - Datos del usuario
 ```json
 {
-  "success": true,
   "name": "Juan Pérez",
   "username": "juanperez"
 }
@@ -122,7 +120,6 @@ Obtiene los datos del usuario autenticado según el token JWT. **Requiere autent
 **401 Unauthorized** - Token inválido o expirado
 ```json
 {
-  "success": false,
   "error": "Unauthorized",
   "message": "Invalid or expired token"
 }
@@ -131,7 +128,6 @@ Obtiene los datos del usuario autenticado según el token JWT. **Requiere autent
 **404 Not Found** - Usuario no encontrado
 ```json
 {
-  "success": false,
   "error": "NotFoundException",
   "message": "user not found"
 }
@@ -156,30 +152,33 @@ Obtiene la lista de todos los usuarios registrados en el sistema. **Requiere aut
 
 **Respuestas:**
 
-**200 OK** - Lista de usuarios
+**200 OK** - Lista de usuarios (array directo)
 ```json
-{
-  "success": true,
-  "count": 2,
-  "users": [
-    {
-      "name": "Juan Pérez",
-      "username": "juanperez"
-    },
-    {
-      "name": "María García",
-      "username": "mariagarcia"
-    }
-  ]
-}
+[
+  {
+    "name": "Juan Pérez",
+    "username": "juanperez"
+  },
+  {
+    "name": "María García",
+    "username": "mariagarcia"
+  }
+]
 ```
 
 **401 Unauthorized** - Token inválido o expirado
 ```json
 {
-  "success": false,
   "error": "Unauthorized",
   "message": "Invalid or expired token"
+}
+```
+
+**404 Not Found** - Usuario no encontrado
+```json
+{
+  "error": "NotFoundException",
+  "message": "user not found"
 }
 ```
 
@@ -190,6 +189,70 @@ Obtiene la lista de todos los usuarios registrados en el sistema. **Requiere aut
 curl -X GET http://localhost:8080/api/users/all \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
 ```
+
+---
+
+## 5. Reset de Datos (Solo Testing)
+
+### `POST /test/reset`
+
+**⚠️ SOLO PARA TESTING** - Elimina todos los usuarios de la memoria. No debe usarse en producción.
+
+**Uso:**
+```bash
+curl -X POST http://localhost:8080/api/test/reset \
+  -H "Content-Type: application/json"
+```
+
+**O usando el script:**
+```bash
+cd api
+./src/test/bash/reset-data.sh
+```
+
+**Respuestas:**
+
+**200 OK** - Datos reseteados exitosamente
+```json
+{
+  "message": "Data reset successfully"
+}
+```
+
+**500 Internal Server Error** - Error al resetear
+```json
+{
+  "success": false,
+  "error": "InternalServerError",
+  "message": "Error message"
+}
+```
+
+### ¿Cuándo usar este endpoint?
+
+1. **Antes de ejecutar tests de integración** - Para asegurar un estado limpio
+2. **Entre ejecuciones de tests** - Para evitar que se acumulen datos de tests anteriores
+3. **Al desarrollar** - Para resetear rápidamente la API sin reiniciarla
+
+### Ejemplo de flujo de testing:
+
+```bash
+# 1. Resetear datos antes de ejecutar tests
+cd api
+./src/test/bash/reset-data.sh
+
+# 2. Ejecutar tests de la app con datos limpios
+cd ../app
+mvn test
+```
+
+### Notas de seguridad:
+
+⚠️ **IMPORTANTE**: Este endpoint:
+- Solo debe usarse en entornos de desarrollo/testing
+- No requiere autenticación (por simplicidad en testing)
+- Elimina TODOS los usuarios de la memoria
+- **NO debe estar disponible en producción**
 
 ---
 
@@ -213,6 +276,7 @@ La API usa **JSON Web Tokens (JWT)** para autenticación:
 ### Endpoints públicos (no requieren autenticación):
 - `POST /users` - Registro de usuario
 - `POST /users/auth` - Autenticación (login)
+- `POST /test/reset` - Reset de datos (solo testing)
 
 ### Ventajas de JWT:
 - ✅ Stateless - No requiere almacenar sesiones en el servidor
@@ -239,9 +303,9 @@ La API usa **JSON Web Tokens (JWT)** para autenticación:
      -H "Content-Type: application/json" \
      -d '{"username":"juanperez","password":"pass123"}'
    ```
-   Respuesta: `{"token":"Bearer eyJhbGci..."}`
+   Respuesta: `{"token":"eyJhbGci..."}`
 
-3. **Guardar el token** en localStorage (web) o en memoria (app)
+3. **Guardar el token con prefijo "Bearer "** en localStorage (web) o en memoria (app)
 
 4. **Usar el token en peticiones protegidas:**
    ```bash
