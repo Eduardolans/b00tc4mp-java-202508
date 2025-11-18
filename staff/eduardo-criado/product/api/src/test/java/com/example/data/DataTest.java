@@ -44,10 +44,10 @@ class DataTest {
 
         // Assert
         assertTrue(result, "User should be added successfully");
-        User foundUser = data.findUserByUsername("juanperez");
-        assertNotNull(foundUser, "User should be found after adding");
-        assertEquals("Juan Pérez", foundUser.getName());
-        assertEquals("juanperez", foundUser.getUsername());
+        assertNotNull(data.usersByUsername.get("juanperez"), "User should be in usersByUsername");
+        assertNotNull(data.usersById.get(user.getId()), "User should be in usersById");
+        assertEquals(user, data.usersByUsername.get("juanperez"));
+        assertEquals(user, data.usersById.get(user.getId()));
     }
 
     @Test
@@ -67,9 +67,12 @@ class DataTest {
         assertTrue(result2);
         assertTrue(result3);
 
-        assertNotNull(data.findUserByUsername("user1"));
-        assertNotNull(data.findUserByUsername("user2"));
-        assertNotNull(data.findUserByUsername("user3"));
+        assertNotNull(data.usersByUsername.get("user1"));
+        assertNotNull(data.usersByUsername.get("user2"));
+        assertNotNull(data.usersByUsername.get("user3"));
+        assertNotNull(data.usersById.get(user1.getId()));
+        assertNotNull(data.usersById.get(user2.getId()));
+        assertNotNull(data.usersById.get(user3.getId()));
     }
 
     @Test
@@ -88,25 +91,6 @@ class DataTest {
         assertEquals("mariagarcia", foundUser.getUsername());
         assertEquals("pass456", foundUser.getPassword());
     }
-
-    // @Test
-    // @DisplayName("Should return false when array is full")
-    // void testAddUser_ArrayFull() {
-    // // Arrange - Fill the array completely
-    // for (int i = 0; i < 100; i++) {
-    // User user = new User("User " + i, "user" + i, "pass" + i);
-    // data.addUser(user);
-    // }
-
-    // // Act - Try to add one more user
-    // User extraUser = new User("Extra User", "extrauser", "pass");
-    // boolean result = data.addUser(extraUser);
-
-    // // Assert
-    // assertFalse(result, "Should return false when array is full");
-    // assertNull(data.findUserByUsername("extrauser"), "Extra user should not be
-    // added");
-    // }
 
     @Test
     @DisplayName("Should return null when user not found by username")
@@ -211,12 +195,6 @@ class DataTest {
 
         // Assert
         assertNotNull(allUsers, "Should return users array");
-        // assertEquals(100, allUsers.length, "Array should have size 100");
-
-        // All positions should be null
-        // for (int i = 0; i < 100; i++) {
-        // assertNull(allUsers[i], "All positions should be null");
-        // }
     }
 
     @Test
@@ -229,21 +207,19 @@ class DataTest {
         data.addUser(user2);
 
         // Verify users exist before reset
-        assertNotNull(data.findUserByUsername("user1"));
-        assertNotNull(data.findUserByUsername("user2"));
+        assertNotNull(data.usersByUsername.get("user1"));
+        assertNotNull(data.usersByUsername.get("user2"));
 
         // Act - Reset data
         data.reset();
 
         // Assert - Users should be gone
-        assertNull(data.findUserByUsername("user1"), "User1 should be removed after reset");
-        assertNull(data.findUserByUsername("user2"), "User2 should be removed after reset");
-
-        // Verify array is clean
-        // User[] allUsers = data.getAllUsers();
-        // for (int i = 0; i < 100; i++) {
-        // assertNull(allUsers[i], "All positions should be null after reset");
-        // }
+        assertNull(data.usersByUsername.get("user1"), "User1 should be removed after reset");
+        assertNull(data.usersByUsername.get("user2"), "User2 should be removed after reset");
+        assertNull(data.usersById.get(user1.getId()), "User1 should be removed from usersById");
+        assertNull(data.usersById.get(user2.getId()), "User2 should be removed from usersById");
+        assertTrue(data.usersByUsername.isEmpty(), "usersByUsername should be empty");
+        assertTrue(data.usersById.isEmpty(), "usersById should be empty");
     }
 
     @Test
@@ -260,8 +236,9 @@ class DataTest {
 
         // Assert
         assertTrue(result, "Should be able to add user after reset");
-        assertNull(data.findUserByUsername("user1"), "Old user should not exist");
-        assertNotNull(data.findUserByUsername("user2"), "New user should exist");
+        assertNull(data.usersByUsername.get("user1"), "Old user should not exist");
+        assertNotNull(data.usersByUsername.get("user2"), "New user should exist");
+        assertNotNull(data.usersById.get(user2.getId()), "New user should exist in usersById");
     }
 
     @Test
