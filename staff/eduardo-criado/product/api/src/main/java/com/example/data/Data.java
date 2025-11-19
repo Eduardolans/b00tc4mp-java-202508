@@ -23,17 +23,9 @@ public class Data {
         usersById = new HashMap<>();
     }
 
-    public boolean addUser(User user) {
-        if (user == null || user.getUsername() == null || user.getId() == null) {
-            return false;
-        }
-        if (usersByUsername.containsKey(user.getUsername()) || usersById.containsKey(user.getId())) {
-            return false;
-        }
-
+    public void addUser(User user) {
         usersByUsername.put(user.getUsername(), user);
         usersById.put(user.getId(), user);
-        return true;
     }
 
     public User findUserByUsername(String username) {

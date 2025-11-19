@@ -10,9 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 
 import com.example.api.helper.JwtHelper;
-import com.example.data.User;
 import com.example.errors.NotFoundException;
 import com.example.logic.Logic;
+import com.example.logic.UserTO;
 
 @WebServlet("/users/info")
 public class GetUserInfoServlet extends HttpServlet {
@@ -41,7 +41,7 @@ public class GetUserInfoServlet extends HttpServlet {
 
             // Obtener el usuario por el userId del token
             Logic logic = Logic.get();
-            User user = logic.getUserInfo(userId);
+            UserTO user = logic.getUserInfo(userId);
 
             // Respuesta exitosa con los datos del usuario
             JSONObject jsonResponse = new JSONObject();

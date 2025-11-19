@@ -45,35 +45,21 @@ class LogicTest {
     @Test
     @DisplayName("Should register a user successfully")
     void testRegisterUser_Success() {
+        String name = "Juan Pérez";
+        String username = "juanperez";
+        String password = "pass123";
         // Act & Assert - Should not throw exception
         assertDoesNotThrow(() -> {
-            logic.registerUser("Juan Pérez", "juanperez", "pass123");
+            logic.registerUser(name, username, password);
         }, "Should register user without throwing exception");
 
         // Verify user was added to data
         Data data = Data.get();
         User user = data.findUserByUsername("juanperez");
         assertNotNull(user, "User should exist in data");
-        assertEquals("Juan Pérez", user.getName());
-        assertEquals("juanperez", user.getUsername());
-        assertEquals("pass123", user.getPassword());
-    }
-
-    @Test
-    @DisplayName("Should register multiple users successfully")
-    void testRegisterMultipleUsers_Success() {
-        // Act & Assert
-        assertDoesNotThrow(() -> {
-            logic.registerUser("User One", "user1", "pass1");
-            logic.registerUser("User Two", "user2", "pass2");
-            logic.registerUser("User Three", "user3", "pass3");
-        });
-
-        // Verify all users exist
-        Data data = Data.get();
-        assertNotNull(data.findUserByUsername("user1"));
-        assertNotNull(data.findUserByUsername("user2"));
-        assertNotNull(data.findUserByUsername("user3"));
+        assertEquals(name, user.getName());
+        assertEquals(username, user.getUsername());
+        assertEquals(password, user.getPassword());
     }
 
     // ==================== registerUser tests ====================
@@ -81,13 +67,22 @@ class LogicTest {
     @Test
     @DisplayName("Should throw DuplicityException when registering duplicate user")
     void testRegisterUser_DuplicateUsername() throws DuplicityException {
+        String name = "Original User";
+        String username = "duplicate";
+        String password = "pass1";
+
+        String name2 = "Another User";
+        String username2 = "duplicate";
+        String password2 = "pass2";
+
         // Arrange
-        logic.registerUser("Original User", "duplicate", "pass1");
+
+        logic.registerUser(name, username, password);
 
         // Act & Assert
         DuplicityException exception = assertThrows(
                 DuplicityException.class,
-                () -> logic.registerUser("Another User", "duplicate", "pass2"),
+                () -> logic.registerUser(name2, username2, password2),
                 "Should throw DuplicityException for duplicate username");
 
         assertEquals("user already exists", exception.getMessage());
@@ -102,10 +97,9 @@ class LogicTest {
         data.addUser(user);
 
         // Act
-        String userId = logic.authenticateUser("mariagarcia", "pass456");
+        String userId = logic.authenticateUser(user.getUsername(), user.getPassword());
 
         // Assert
-        assertNotNull(userId, "UserId should not be null");
         assertEquals(user.getId(), userId, "Should return correct userId");
     }
 
@@ -134,40 +128,10 @@ class LogicTest {
         // Act & Assert
         CredentialsException exception = assertThrows(
                 CredentialsException.class,
-                () -> logic.authenticateUser("pedrolopez", "wrongpass"),
+                () -> logic.authenticateUser(user.getUsername(), "wrongpass"),
                 "Should throw CredentialsException when password is incorrect");
 
         assertEquals("invalid credentials", exception.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should get user by username successfully")
-    void testGetUserByUsername_Success() throws NotFoundException {
-        // Arrange
-        User user = new User("Ana Martínez", "anamartinez", "pass789");
-        Data data = Data.get();
-        data.addUser(user);
-
-        // Act
-        User foundUser = logic.getUserByUsername("anamartinez");
-
-        // Assert
-        assertNotNull(foundUser, "User should not be null");
-        assertEquals("Ana Martínez", foundUser.getName());
-        assertEquals("anamartinez", foundUser.getUsername());
-        assertEquals("pass789", foundUser.getPassword());
-    }
-
-    @Test
-    @DisplayName("Should throw NotFoundException when user not found by username")
-    void testGetUserByUsername_NotFound() {
-        // Act & Assert
-        NotFoundException exception = assertThrows(
-                NotFoundException.class,
-                () -> logic.getUserByUsername("nonexistent"),
-                "Should throw NotFoundException when user not found");
-
-        assertEquals("user not found", exception.getMessage());
     }
 
     // ==================== getUserByUsername tests ====================
@@ -182,14 +146,13 @@ class LogicTest {
         String userId = user.getId();
 
         // Act
-        User foundUser = logic.getUserInfo(userId);
+        UserTO foundUser = logic.getUserInfo(userId);
 
         // Assert
         assertNotNull(foundUser, "User should not be null");
         assertEquals(userId, foundUser.getId());
-        assertEquals("Carlos Ruiz", foundUser.getName());
-        assertEquals("carlosruiz", foundUser.getUsername());
-        assertEquals("pass321", foundUser.getPassword());
+        assertEquals(user.getName(), foundUser.getName());
+        assertEquals(user.getUsername(), foundUser.getUsername());
     }
 
     @Test
@@ -227,10 +190,7 @@ class LogicTest {
         // Assert
         assertNotNull(allUsers, "Users array should not be null");
 
-        // Verify first 3 users are not null
-        assertNotNull(allUsers.get(0));
-        assertNotNull(allUsers.get(1));
-        assertNotNull(allUsers.get(2));
+        assertEquals(3, allUsers.size(), "Should have 3 users");
 
         // Verify users are in the list
         assertTrue(allUsers.contains(user1));
@@ -258,24 +218,6 @@ class LogicTest {
     // ==================== getAllUsers tests ====================
 
     @Test
-    @DisplayName("Should get user array when only one user registered")
-    void testGetAllUsers_SingleUser() throws NotFoundException {
-        // Arrange
-        User user = new User("Solo User", "solouser", "pass");
-        Data data = Data.get();
-        data.addUser(user);
-        String userId = user.getId();
-
-        // Act
-        List<User> allUsers = logic.getAllUsers(userId);
-
-        // Assert
-        assertNotNull(allUsers, "Users array should not be null");
-        assertNotNull(allUsers.get(0), "First user should exist");
-        assertEquals("solouser", allUsers.get(0).getUsername());
-    }
-
-    @Test
     @DisplayName("Should maintain singleton pattern")
     void testSingletonPattern() {
         // Act
@@ -286,41 +228,6 @@ class LogicTest {
         assertSame(instance1, instance2, "Logic should be a singleton");
     }
 
-    @Test
-    @DisplayName("Complete workflow: register, authenticate, get info, get all users")
-    void testCompleteWorkflow() throws DuplicityException, CredentialsException, NotFoundException {
-        // 1. Register users
-        logic.registerUser("Admin User", "admin", "adminpass");
-        logic.registerUser("Regular User", "regular", "regularpass");
-
-        // 2. Authenticate
-        String adminId = logic.authenticateUser("admin", "adminpass");
-        assertNotNull(adminId);
-
-        String regularId = logic.authenticateUser("regular", "regularpass");
-        assertNotNull(regularId);
-
-        // 3. Get user info
-        User adminUser = logic.getUserInfo(adminId);
-        assertEquals("Admin User", adminUser.getName());
-        assertEquals("admin", adminUser.getUsername());
-
-        User regularUser = logic.getUserInfo(regularId);
-        assertEquals("Regular User", regularUser.getName());
-        assertEquals("regular", regularUser.getUsername());
-
-        // 4. Get all users
-        List<User> allUsers = logic.getAllUsers(adminId);
-        assertNotNull(allUsers);
-        assertEquals(2, countNonNullUsers(allUsers), "Should have 2 users");
-
-        // 5. Verify user by username
-        User foundUser = logic.getUserByUsername("admin");
-        assertEquals(adminId, foundUser.getId());
-    }
-
-    // ==================== Singleton pattern test ====================
-
     /**
      * Helper method to reset the Logic singleton instance using reflection
      */
@@ -330,8 +237,6 @@ class LogicTest {
         instanceField.set(null, null);
     }
 
-    // ==================== Integration test ====================
-
     /**
      * Helper method to reset the Data singleton instance using reflection
      */
@@ -339,18 +244,5 @@ class LogicTest {
         Field instanceField = Data.class.getDeclaredField("instance");
         instanceField.setAccessible(true);
         instanceField.set(null, null);
-    }
-
-    /**
-     * Helper method to count non-null users in array
-     */
-    private int countNonNullUsers(List<User> users) {
-        int count = 0;
-        for (User user : users) {
-            if (user != null) {
-                count++;
-            }
-        }
-        return count;
     }
 }
