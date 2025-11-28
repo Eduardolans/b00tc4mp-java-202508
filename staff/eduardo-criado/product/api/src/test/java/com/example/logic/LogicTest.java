@@ -33,6 +33,8 @@ class LogicTest {
         resetLogicInstance();
         resetDataInstance();
         logic = Logic.get();
+        // Clear data before each test
+        Data.get().reset();
     }
 
     @AfterEach
@@ -40,6 +42,8 @@ class LogicTest {
         // Clean up after each test
         resetLogicInstance();
         resetDataInstance();
+        logic = null;
+        Data.get().reset();
     }
 
     @Test
@@ -193,9 +197,14 @@ class LogicTest {
         assertEquals(3, allUsers.size(), "Should have 3 users");
 
         // Verify users are in the list
-        assertTrue(allUsers.contains(user1));
-        assertTrue(allUsers.contains(user2));
-        assertTrue(allUsers.contains(user3));
+
+        boolean containsUser1 = allUsers.stream().anyMatch(u -> u.getId().equals(user1.getId()));
+        boolean containsUser2 = allUsers.stream().anyMatch(u -> u.getId().equals(user2.getId()));
+        boolean containsUser3 = allUsers.stream().anyMatch(u -> u.getId().equals(user3.getId()));
+
+        assertTrue(containsUser1);
+        assertTrue(containsUser2);
+        assertTrue(containsUser3);
     }
 
     @Test

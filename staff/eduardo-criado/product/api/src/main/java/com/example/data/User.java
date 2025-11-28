@@ -8,8 +8,21 @@ public class User {
     private String username;
     private String password;
 
+    /**
+     * Constructor for creating new users (generates UUID)
+     */
     public User(String name, String username, String password) {
         this.id = UUID.randomUUID().toString();
+        this.name = name;
+        this.username = username;
+        this.password = password;
+    }
+
+    /**
+     * Constructor for users loaded from database (uses existing id)
+     */
+    public User(String id, String name, String username, String password) {
+        this.id = id;
         this.name = name;
         this.username = username;
         this.password = password;
